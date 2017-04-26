@@ -1,1 +1,1 @@
-pyinstaller.exe --onefile not_a_keylogger.py
+pyinstaller.exe --onefile keylogger.py
