@@ -15,3 +15,4 @@ A Keylogger for CS460 Final Project
 2. Run **setup.bat**.
 3. Navigate to the newly created **dist** folder. If the setup was successful then **keylogger.exe** should be there.
 
+The current email target is the sender. Its login information is located in the python script. The destination can be changed via the destEmail variable.
