@@ -3,7 +3,9 @@
 A Keylogger for CS460 Final Project
 
 (Tested on Windows 10, python version 2.7.13)
+
 Note: Python 3 users may experience issues when attempting to build the executable file
+
 ## Setting up:
 1. Get Packages needed to compile:
  - pynput 
