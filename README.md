@@ -2,6 +2,8 @@
 ###### by kchang33 and ywu100
 A Keylogger for CS460 Final Project
 
+Sends emails to a specified email address in batches of relatively constant length. These emails contain the key captures as well as the victim's IP address, hostname, username, and system configurations.
+
 (Tested on Windows 10, python version 2.7.13)
 
 Note: Python 3 users may experience issues when attempting to build the executable file
