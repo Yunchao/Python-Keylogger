@@ -39,7 +39,24 @@ def filterKeys(letter):
 		'Key.page_up': '[PAGEUP]',
 		'Key.page_down': '[PAGEDOWN]',
 		'Key.cmd': '[WINDOWSKEY]',
-		'Key.menu': '[MENU]'
+		'Key.menu': '[MENU]',
+                'Key.up': '[UP]',
+                'Key.down': '[DOWN]',
+                'Key.left': '[LEFT]',
+                'Key.right': '[RIGHT]',
+                'Key.f1': '[F1]',
+                'Key.f2': '[F2]',
+                'Key.f3': '[F3]',
+                'Key.f4': '[F4]',
+                'Key.f5': '[F5]',
+                'Key.f6': '[F6]',
+                'Key.f7': '[F7]',
+                'Key.f8': '[F8]',
+                'Key.f9': '[F9]',
+                'Key.f10': '[F10]',
+                'Key.f11': '[F11]',
+                'Key.f12': '[F12]',
+                
 	}
 	return replacements.get(letter,letter)
 def serverSetup():
