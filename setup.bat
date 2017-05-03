@@ -6,4 +6,3 @@ IF %ERRORLEVEL% NEQ 0 (
 echo FAILED TO PRODUCE EXE FILE.&echo
 pause
 )
-\dist\keylogger.exe
