@@ -30,7 +30,7 @@ def filterKeys(letter):
 		'Key.shift_r': '[SHIFT_R]',
 		'Key.alt_l': '[ALT_L]',
 		'Key.alt_r': '[ALT_R]',
-		'key.caps_lock': '[CAPS_LOCK]',
+		'Key.caps_lock': '[CAPS_LOCK]',
 		'Key.backspace': '[BACKSPACE]',
 		'Key.enter': '[ENTER]\n',
 		'Key.esc': '[ESC]',
